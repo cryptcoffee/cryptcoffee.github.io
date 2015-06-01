@@ -1,0 +1,61 @@
+@font-face {
+    font-family: cryptcoffeefont; /* FONT: http://www.04.jp.org */
+    src: url("../font/font.ttf") format('truetype');
+}
+
+body {
+    background-color:black;
+}
+
+
+h1
+{
+    color: #7FFFD4;
+    font-size-adjust:0.5;
+    text-align:center;
+    margin:0px 0px;
+}
+
+h2
+{
+    font-family: cryptcoffeefont;
+    font-size: 60px;
+    color:#7FFFD4;
+    margin:0px 0px;
+    text-align:center;
+}
+
+.ascii_table
+{
+    font-family: monospace;
+    font-size: 16px;
+    white-space: pre;
+    color:#7FFFD4;
+    
+}
+
+.footer
+{
+    font-family: monospace;
+    font-size: 10px;
+    color:#7FFFD4;
+}
+
+.menu
+{
+    font-family: monospace;
+    font-size: 16px;
+    text-align: center;
+    color:#7FFFD4;
+}
+
+a
+{
+    text-decoration: none;
+    color:#7FFFD4;
+    
+}
+a:hover 
+{
+    color: red;
+} 
