@@ -1,9 +1,9 @@
 @font-face {
-    font-family: cryptcoffeefont; /* FONT: http://www.04.jp.org */
-    src: url("../font/04b19/font.ttf") format('truetype');
+    font-family: cryptcoffeefont; /* SOURCE: http://www.04.jp.org */
+    src: url("../font/04b19/Font04B19.ttf") format('truetype');
 }
 
-@font-face{
+@font-face {
     font-family: cryptcoffeemono;
     src: url("../font/FiraMono/FiraMono-Regular.otf");
 }
@@ -12,14 +12,14 @@ body {
     background-color:black;
 }
 
-h1{
+h1 {
     color: #7FFFD4;
     font-size-adjust:0.5;
     text-align:center;
     margin:0px 0px;
 }
 
-h2{
+h2 {
     font-family: cryptcoffeefont;
     font-size: 60px;
     color:#7FFFD4;
@@ -27,7 +27,7 @@ h2{
     text-align:center;
 }
 
-.ascii_table{
+.ascii_table {
     font-family: cryptcoffeemono;
     font-size: 16px;
     letter-spacing: 0em;
@@ -37,20 +37,20 @@ h2{
     margin-left: 6px;
 }
 
-.footer{
+.footer {
     font-family: monospace;
     font-size: 10px;
     color:#7FFFD4;
 }
 
-.menu{
+.menu {
     font-family: monospace;
     font-size: 16px;
     text-align: center;
     color:#7FFFD4;
 }
 
-a{
+a {
     text-decoration: none;
     color:#7FFFD4;
 }
