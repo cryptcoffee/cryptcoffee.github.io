@@ -27,6 +27,18 @@ h2 {
     text-align:center;
 }
 
+.title{
+    font-family: cryptcoffeefont;
+    font-size: 60px;
+    color:#7FFFD4;
+    margin:0px 0px;
+    text-align:center;
+}
+
+.title:hover {
+    color:#7FFFD4;
+} 
+
 .ascii_table {
     font-family: cryptcoffeemono;
     font-size: 16px;
