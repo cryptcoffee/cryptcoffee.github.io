@@ -4,8 +4,13 @@
 }
 
 @font-face {
-    font-family: cryptcoffeemono;
+    font-family: cryptcoffeeregular;
     src: url("../font/FiraMono/FiraMono-Regular.otf");
+}
+
+@font-face {
+    font-family: cryptcoffeecourier;
+    src: url("../font/Courier_new/cour.ttf") format('truetype');
 }
 
 body {
@@ -40,7 +45,7 @@ h2 {
 } 
 
 .ascii_table {
-    font-family: cryptcoffeemono;
+    font-family: cryptcoffeeregular;
     font-size: 16px;
     letter-spacing: 0em;
     white-space: pre;
