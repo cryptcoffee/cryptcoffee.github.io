@@ -78,6 +78,7 @@ a:hover {
 } 
 
 pre{
+font-family: monospace;
 background-color:black;
 color:#7FFFD4;
 text-align: left;
