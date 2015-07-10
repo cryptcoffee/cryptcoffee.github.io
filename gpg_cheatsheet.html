@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <meta http-equiv="content-language" content="en" />
+   <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
+   <meta name="description" content="cryptcoffee website" />
+   <meta name="robots" content="follow,index,all" />
+   <title>crypt.coffee</title>
+   
+   <link href="./css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<center>
+   <div>
+        <h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2>
+        <p class="menu">
+        <a href="misc.html">Misc</a> -
+        <a href="#">Research</a> -
+        <a href="team.html">Team</a> -
+        <a href="contact.html">Contact</a>
+        </p>
+   </div>
+   
+
+   
+<div>
+	<div style="width:700px; border:1px solid #7FFFD4;">
+		<div style="position:relative;width: 100%;">
+			<pre>
+Last Update: June 10, 2015
+<pre style="font-size:14px;text-align:center;">-----[ GnuPG cheatsheet ]-----</pre>
+This document is intended to be a quick note about some GnuPG commands.
+Hope this will be useful as writing it was for me. 
+
+DEADBEEF is used as an example key ID, note any part of the user ID can be used as key
+specifier to identify a key.
+
+The --output option can be always omitted.
+
+Any output, keys, encrypted documents, and signatures, can be ASCII-armored by adding
+the --armor option.
+
+
+GENERATE A KEYPAIR
+------------------
+# gpg --full-gen-key 
+
+
+GENERATE A REVOKE CERTIFICATE
+-----------------------------
+# gpg --output revoke.gpg --gen-revoke DEADBEEF
+
+
+LIST KEYS ON THE KEYRING
+------------------------
+# gpg --list-keys
+
+
+EXPORT A PUBLIC KEY
+-------------------
+# gpg --output coffee.gpg --export DEADBEEF
+# gpg --armor --export DEADBEEF
+
+
+EXPORT A PRIVATE KEY
+--------------------
+# gpg --export-secret-keys DEADBEEF
+
+
+IMPORT A KEY
+------------
+# gpg --import key.gpg
+
+
+VALIDATE A PUBLIC KEY
+---------------------
+A key is validated by verifying the key's fingerprint and then signing the key, to certify
+that it is a valid key, and belongs to the correct user.
+Edit the key with
+
+# gpg --edit-key DEADBEEF
+
+then you can view the fingerprint with
+
+# fpr
+
+Now verify the fingerprint with the key owner, you must guarantee that you are communicating
+with the key's true owner.
+After checking the fingerprint, you may sign the key to validate it
+
+# sign
+
+You can list the signatures on the key with
+
+# check
+
+
+DELETE A PUBLIC KEY
+-------------------
+# gpg --delete-key DEADBEEF
+
+
+DELETE A PRIVATE KEY
+--------------------
+# gpg --delete-secret-key DEADBEEF
+
+
+ASYMMETRIC ENCRYPTION AND DECRYPTION
+------------------------------------
+# gpg --output enc_doc.gpg --encrypt --recipient ax@crypt.coffee doc
+# gpg --output doc --decrypt enc_doc.gpg
+
+
+SYMMETRIC ENCRYPTION
+--------------------
+With a passphrase.
+
+# gpg --output doc.gpg --symmetric doc.gpg
+
+
+SIGN A DOCUMENT
+---------------
+A signature is created using the private key of the signer.
+Compress the doc before sign, output in binary format.
+
+# gpg --sign doc
+
+
+CLEARSIGN A DOCUMENT
+--------------------
+Wrapped in an ASCII-armored signature but otherwise human readable.
+
+# gpg --clearsign doc
+
+
+DETACHED SIGNATURE
+------------------
+Creates a detached signature, in a separate file.
+
+# gpg [--armor] --detach-sig doc
+
+
+EXTRACT A SIGNED DOCUMENT
+-------------------------
+# gpg --decrypt doc.sig
+
+
+VERIFY A SIGNED DOCUMET
+-----------------------
+# gpg --verify doc.sig
+
+
+
+		</pre>
+	</div>
+</div>
+
+</center>
+
+ <div align="center" class="footer">
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+                </a><br /><br />
+                <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">crypt.coffee website</span> by 
+                <a xmlns:cc="http://creativecommons.org/ns#" href="http://crypt.coffee" property="cc:attributionName" rel="cc:attributionURL">cryptcoffee</a> is licensed under a <br />
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>. 
+           </div>
+</body>
+</html>

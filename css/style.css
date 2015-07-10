@@ -58,6 +58,7 @@ h2 {
     font-family: monospace;
     font-size: 10px;
     color:#7FFFD4;
+	margin-top:20px;
 }
 
 .menu {
@@ -75,3 +76,14 @@ a {
 a:hover {
     color: red;
 } 
+
+pre{
+background-color:black;
+color:#7FFFD4;
+text-align: left;
+text-decoration: none;
+margin:0px;
+padding:20px;
+}
+
+
