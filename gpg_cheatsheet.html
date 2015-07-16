@@ -35,13 +35,11 @@ Last Update: June 10, 2015
 This document is intended to be a quick note about some GnuPG commands.
 Hope this will be useful as writing it was for me. 
 
-DEADBEEF is used as an example key ID, note any part of the user ID can be used as key
-specifier to identify a key.
+DEADBEEF is used as an example key ID, note any part of the user ID can be used as key specifier to identify a key.
 
-The --output option can be always omitted.
+The --output option can always be omitted.
 
-Any output, keys, encrypted documents, and signatures, can be ASCII-armored by adding
-the --armor option.
+Any output, keys, encrypted documents, and signatures, can be ASCII-armored by adding the --armor option.
 
 
 GENERATE A KEYPAIR
@@ -77,8 +75,7 @@ IMPORT A KEY
 
 VALIDATE A PUBLIC KEY
 ---------------------
-A key is validated by verifying the key's fingerprint and then signing the key, to certify
-that it is a valid key, and belongs to the correct user.
+A key is validated by verifying the key's fingerprint and then signing the key, to certify that it is a valid key, and belongs to the correct user.
 Edit the key with
 
 # gpg --edit-key DEADBEEF
@@ -87,8 +84,7 @@ then you can view the fingerprint with
 
 # fpr
 
-Now verify the fingerprint with the key owner, you must guarantee that you are communicating
-with the key's true owner.
+Now verify the fingerprint with the key owner, you must guarantee that you are communicating with the key's true owner.
 After checking the fingerprint, you may sign the key to validate it
 
 # sign

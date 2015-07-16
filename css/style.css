@@ -77,14 +77,17 @@ a:hover {
     color: red;
 } 
 
+
 pre{
-font-family: monospace;
-background-color:black;
-color:#7FFFD4;
-text-align: left;
-text-decoration: none;
-margin:0px;
-padding:20px;
+    font-family: monospace;
+    background-color:black;
+    color:#7FFFD4;
+    text-align: left;
+    text-decoration: none;
+    margin:0px;
+    padding:20px;
+    word-wrap:normal;
+    white-space:pre-line;
 }
 
 
