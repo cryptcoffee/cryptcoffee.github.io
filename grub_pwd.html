@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <meta http-equiv="content-language" content="en" />
+   <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
+   <meta name="description" content="cryptcoffee website" />
+   <meta name="robots" content="follow,index,all" />
+   <title>crypt.coffee</title>
+   
+   <link href="./css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<center>
+   <div>
+        <h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2>
+        <p class="menu">
+        <a href="misc.html">Misc</a> -
+        <a href="#">Research</a> -
+        <a href="team.html">Team</a> -
+        <a href="contact.html">Contact</a>
+        </p>
+   </div>
+   
+
+   
+<div>
+	<div style="width:700px; border:1px solid #7FFFD4;">
+		<div style="position:relative;width: 100%;">
+			<pre>
+Last Update: September 28, 2015
+<pre style="font-size:14px;text-align:center;">-----[ GRUB2 password tricks ]-----</pre>
+This document is intended to be a quick note about securing grub boot loader configuration 
+with a passphrase.
+
+First of all you have to generate a strong key. This can be done through:
+
+# grub-mkpasswd-pbkdf2
+
+The utility uses pbkdf2-hmac-sha512 to protect your passphrase against brute-force attacks
+You can adjust the iteration count in order to improve the strenght of the key derivation
+with the -c option. The default value is 10000.
+
+# grub-mkpasswd-pbkdf2 -c1000000
+
+Then you have to set a superuser in your grub configuration file. To preserve changes form
+updates edit the /etc/grub.d/40_custom file. Add these lines:
+
+  set superusers="py"
+  password_pbkdf2 py grub.pbkdf2.sha512.1000000.11BD0653432FE3A7E2E3B00E...
+
+If you want the password preventing access to the grub command console only you can use the
+--unrestricted option. Modify the script in /etc/grub.d/10_linux adding after:
+
+  CLASS="--class gnu-linux --class gnu --class os"
+
+  if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
+    OS=Linux
+  else
+    OS="${GRUB_DISTRIBUTOR} Linux"
+    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C sed 
+    's,[^[:alnum:]_],_,g') ${CLASS}"
+  fi
+
+The line:
+
+  CLASS="--unrestricted ${CLASS}"
+
+Now just run:
+
+# grub-mkconfig -o /boot/grub/grub.cfg
+
+This will set the unrestricted option to all the grub menu entry.
+
+Alternatively you can make a "sporca" - a dirty trick ;) - by editing the generated /boot/grub/grub.cfg after having run grub-mkconfig.
+Add the option --unrestricted to every menuentry you want, like this:
+
+  menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux --class gnu --class os 
+  $menuentry_id_option 'gnulinux-simple-2e0270af-9ced-4c4f-b728-bf7199f2c5a1' {
+
+Note that /boot/grub/grub.cfg will be overwritten if you run grub-mkconfig again.
+
+
+
+----------
+[1] https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks
+
+		</pre>
+	</div>
+</div>
+
+</center>
+
+ <div align="center" class="footer">
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+                </a><br /><br />
+                <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">crypt.coffee website</span> by 
+                <a xmlns:cc="http://creativecommons.org/ns#" href="http://crypt.coffee" property="cc:attributionName" rel="cc:attributionURL">cryptcoffee</a> is licensed under a <br />
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>. 
+           </div>
+</body>
+</html>
