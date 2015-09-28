@@ -31,61 +31,67 @@
 		<div style="position:relative;width: 100%;">
 			<pre>
 Last Update: September 28, 2015
-<pre style="font-size:14px;text-align:center;">-----[ GRUB2 password tricks ]-----</pre>
-This document is intended to be a quick note about securing grub boot loader configuration 
-with a passphrase.
+<pre style="font-size:14px;text-align:center;">-----[ GRUB2 password tips ]-----</pre>
+This document is intended to be a quick note about securing GRUB boot loader configuration with a passphrase.
 
 First of all you have to generate a strong key. This can be done through:
 
 # grub-mkpasswd-pbkdf2
 
-The utility uses pbkdf2-hmac-sha512 to protect your passphrase against brute-force attacks
-You can adjust the iteration count in order to improve the strenght of the key derivation
-with the -c option. The default value is 10000.
+The utility uses pbkdf2-hmac-sha512 to protect your passphrase against brute-force attacks.
+You can adjust the iteration count in order to improve the strength of the key derivation process with the -c option. The default value is 10000.
 
 # grub-mkpasswd-pbkdf2 -c1000000
 
-Then you have to set a superuser in your grub configuration file. To preserve changes form
-updates edit the /etc/grub.d/40_custom file. Add these lines:
+Then you have to set a superuser in your GRUB configuration file. To preserve changes form future updates edit the /etc/grub.d/40_custom file. Add these lines:
 
-  set superusers="py"
-  password_pbkdf2 py grub.pbkdf2.sha512.1000000.11BD0653432FE3A7E2E3B00E...
+  ----------------------------------------------------------------------------------------
+  set superusers="py"							      
+  password_pbkdf2 py grub.pbkdf2.sha512.1000000.11BD0653432FE3A7E2E3B00E... 
+  ----------------------------------------------------------------------------------------
 
-If you want the password preventing access to the grub command console only you can use the
---unrestricted option. Modify the script in /etc/grub.d/10_linux adding after:
+If you want the password to prevent access to the GRUB command console only, you can use the --unrestricted option. Modify the script in /etc/grub.d/10_linux adding after:
 
+  ----------------------------------------------------------------------------------------
   CLASS="--class gnu-linux --class gnu --class os"
 
   if [ "x${GRUB_DISTRIBUTOR}" = "x" ] ; then
     OS=Linux
   else
     OS="${GRUB_DISTRIBUTOR} Linux"
-    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C sed 
-    's,[^[:alnum:]_],_,g') ${CLASS}"
+    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C 
+    sed 's,[^[:alnum:]_],_,g') ${CLASS}"
   fi
+  ----------------------------------------------------------------------------------------
 
 The line:
 
+  ----------------------------------------------------------------------------------------
   CLASS="--unrestricted ${CLASS}"
+  ----------------------------------------------------------------------------------------
+
 
 Now just run:
 
 # grub-mkconfig -o /boot/grub/grub.cfg
 
-This will set the unrestricted option to all the grub menu entry.
+This will set the unrestricted option to all the GRUB menu entry.
 
 Alternatively you can make a "sporca" - a dirty trick ;) - by editing the generated /boot/grub/grub.cfg after having run grub-mkconfig.
 Add the option --unrestricted to every menuentry you want, like this:
 
-  menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux --class gnu --class os 
-  $menuentry_id_option 'gnulinux-simple-2e0270af-9ced-4c4f-b728-bf7199f2c5a1' {
+
+  ----------------------------------------------------------------------------------------
+  menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux --class gnu 
+  --class os $menuentry_id_option 'gnulinux-simple-2e0270af-9ced-4c4f-b728-bf7199f2c5a1' {
+  ----------------------------------------------------------------------------------------
 
 Note that /boot/grub/grub.cfg will be overwritten if you run grub-mkconfig again.
 
 
 
 ----------
-[1] https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks
+[1] <a href="https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks" target="_blank"> ArchLinux wiki </a>
 
 		</pre>
 	</div>
