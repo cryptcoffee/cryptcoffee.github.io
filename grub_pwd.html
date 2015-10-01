@@ -66,7 +66,7 @@ If you want the password to prevent access to the GRUB command console only, you
 |  else
 |    OS="${GRUB_DISTRIBUTOR} Linux"
 |    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' 
-|	-f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
+|    -f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
 |  fi
 |
  --------------------------------------------------
