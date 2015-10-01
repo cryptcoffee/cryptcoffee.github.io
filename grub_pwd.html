@@ -65,8 +65,8 @@ If you want the password to prevent access to the GRUB command console only, you
 |    OS=Linux
 |  else
 |    OS="${GRUB_DISTRIBUTOR} Linux"
-|    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' -f1|LC_ALL=C 
-|    sed 's,[^[:alnum:]_],_,g') ${CLASS}"
+|    CLASS="--class $(echo ${GRUB_DISTRIBUTOR} | tr 'A-Z' 'a-z' | cut -d' ' 
+|	-f1|LC_ALL=C sed 's,[^[:alnum:]_],_,g') ${CLASS}"
 |  fi
 |
  --------------------------------------------------
@@ -94,8 +94,9 @@ Add the option --unrestricted to every menuentry you want, like this:
 
  ----[ /boot/grub/grub.cfg ]-----
 |
-|  menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux --class gnu 
-|  --class os $menuentry_id_option 'gnulinux-simple-2e0270af-9ced-4c4f-b728-bf7199f2c5a1' {
+|  menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux 
+|  --class gnu --class os $menuentry_id_option 
+|  'gnulinux-simple-2e0270af-9ced-4c4f-b728-bf7199f2c5a1' {
 |
  --------------------------------------------------
 
