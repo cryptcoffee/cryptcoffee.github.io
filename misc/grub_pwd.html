@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+ <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
@@ -7,48 +7,55 @@
    <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
    <meta name="description" content="cryptcoffee website" />
    <meta name="robots" content="follow,index,all" />
-   <title>cryptcoffee - GRUB2 Password Tips</title>
+   <title>cryptcoffee - GnuPG Cheatsheet</title>
    
-   <link rel="icon" type="image/png" href="imgs/favicon_64x64.png" />
-   <link href="./css/style.css" rel="stylesheet" type="text/css">
+   <link rel="icon" type="image/png" href="../imgs/favicon_64x64.png" />
+   <link href="../css/style.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
 <center>
    <div>
 	   <table style="margin-left:-103px">
-		   <tr><td><img src="imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2></td></tr>
+		   <tr><td><img src="../imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="../index.html">CRYPTCOFFEE</a></h2></td></tr>
 		   </table> 
         <p class="menu">
-        <a href="misc.html">Misc</a> -
-        <a href="research.html">Research</a> -
-        <a href="team.html">Team</a> -
-        <a href="contact.html">Contact</a>
+        <a href="../misc.html">Misc</a> -
+        <a href="../research.html">Research</a> -
+        <a href="../team.html">Team</a> -
+        <a href="../contact.html">Contact</a>
         </p>
    </div>
    
 
-   
+ 
 <div>
-	<div style="width:700px; border:1px solid #7FFFD4;">
+	<div style="width:665px; border:1px solid #7FFFD4;">
 		<div style="position:relative;width: 100%;">
 			<pre>
 Last Update: September 28, 2015
+
 <pre style="font-size:14px;text-align:center;">-----[ GRUB2 Password Tips ]-----</pre>
-This document is intended to be a quick note about securing GRUB boot loader configuration with a passphrase.
+This document is intended to be a quick note about securing GRUB boot loader
+configuration with a passphrase.
 
 First of all you have to generate a strong key. This can be done through:
 
 # grub-mkpasswd-pbkdf2
 
 
-The utility uses pbkdf2-hmac-sha512 to protect your passphrase against brute-force attacks.
-You can adjust the iteration count in order to improve the strength of the key derivation process with the -c option. The default value is 10000.
+The utility uses pbkdf2-hmac-sha512 to protect your passphrase against
+brute-force attacks.
+
+You can adjust the iteration count in order to improve the strength of the key
+derivation process with the -c option. The default value is 10000.
 
 # grub-mkpasswd-pbkdf2 -c1000000
 
 
-Then you have to set a superuser in your GRUB configuration file. To preserve changes form future updates edit the /etc/grub.d/40_custom file. Add these lines:
+Then you have to set a superuser in your GRUB configuration file. To preserve
+changes form future updates edit the /etc/grub.d/40_custom file.
+Add these lines:
 
  ----[ /etc/grub.d/40_custom ]-----
 |
@@ -58,7 +65,9 @@ Then you have to set a superuser in your GRUB configuration file. To preserve ch
  --------------------------------------------------
 
 
-If you want the password to prevent access to the GRUB command console only, you can use the --unrestricted option. Modify the script in /etc/grub.d/10_linux adding after:
+If you want the password to prevent access to the GRUB command console only,
+you can use the --unrestricted option. Modify the script in /etc/grub.d/10_linux
+adding after:
 
  ----[ /etc/grub.d/10_linux ]-----
 |
@@ -91,7 +100,9 @@ Now just run:
 
 This will set the unrestricted option to all the GRUB menu entry.
 
-Alternatively you can make a "sporca" - a dirty trick ;) - by editing the generated /boot/grub/grub.cfg after having run grub-mkconfig.
+Alternatively you can make a "sporca" - a dirty trick ;) - by editing the
+generated /boot/grub/grub.cfg after having run grub-mkconfig.
+
 Add the option --unrestricted to every menuentry you want, like this:
 
 
@@ -104,13 +115,13 @@ Add the option --unrestricted to every menuentry you want, like this:
  --------------------------------------------------
 
 
-Note that /boot/grub/grub.cfg will be overwritten if you run grub-mkconfig again.
+Note that /boot/grub/grub.cfg will be overwritten if you run grub-mkconfig
+again.
 
 
 
 ----------
 [1] <a href="https://wiki.archlinux.org/index.php/GRUB/Tips_and_tricks" target="_blank"> ArchLinux wiki </a>
-
 		</pre>
 	</div>
 </div>

@@ -4,47 +4,48 @@
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
    <meta http-equiv="content-language" content="en" />
-   <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking" />
+   <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
    <meta name="description" content="cryptcoffee website" />
    <meta name="robots" content="follow,index,all" />
-   <title>cryptcoffee - The Dear Old LD_PRELOAD Trick</title>
+   <title>cryptcoffee - GnuPG Cheatsheet</title>
    
-   <link rel="icon" type="image/png" href="imgs/favicon_64x64.png" />
-   <link href="./css/style.css" rel="stylesheet" type="text/css">
+   <link rel="icon" type="image/png" href="../imgs/favicon_64x64.png" />
+   <link href="../css/style.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
 <center>
    <div>
 	   <table style="margin-left:-103px">
-		   <tr><td><img src="imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2></td></tr>
+		   <tr><td><img src="../imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="../index.html">CRYPTCOFFEE</a></h2></td></tr>
 		   </table> 
         <p class="menu">
-        <a href="misc.html">Misc</a> -
-        <a href="research.html">Research</a> -
-        <a href="team.html">Team</a> -
-        <a href="contact.html">Contact</a>
+        <a href="../misc.html">Misc</a> -
+        <a href="../research.html">Research</a> -
+        <a href="../team.html">Team</a> -
+        <a href="../contact.html">Contact</a>
         </p>
    </div>
    
 
-   
+ 
 <div>
-	<div style="width:700px; border:1px solid #7FFFD4;">
+	<div style="width:665px; border:1px solid #7FFFD4;">
 		<div style="position:relative;width: 100%;">
 			<pre>
-
 Last Update: Oct 5, 2015
-+===========================================================================================+
-|-------------------------------------------------------------------------------------------|
-|--------------------------------       The Dear Old       ---------------------------------|
-|-------------------------------         LD_PRELOAD         --------------------------------|
-|---------------------------------          Trick         ----------------------------------|
-|-------------------------------------------------------------------------------------------|
-|-------------------------------------------------------------------------------------------|
 
-This post aim to explain one relatively old trick, based on a very powerfull feature of the
-dynamic linker of most modern Unix-based system. Library preloading. 
++==============================================================================+
+|------------------------------------------------------------------------------|
+|-------------------------       The Dear Old       ---------------------------|
+|------------------------         LD_PRELOAD         --------------------------|
+|--------------------------          Trick         ----------------------------|
+|------------------------------------------------------------------------------|
+
+This post aim to explain one relatively old trick, based on a very powerfull
+feature of the dynamic linker of most modern Unix-based system. Library
+preloading. 
+
 I'm using gcc 5.2.0 on a 64bit Linux box with 4.2.1-1-ARCH.
 
 Look at this code
@@ -59,8 +60,9 @@ Try compiling this simple program with
 
 # gcc ex.c -o ex
 
-gcc by deafult should build a dynamically linked elf, that will use a shared library, 
-it's possible to list the shared libraries dependencies of by a binary with ldd.
+gcc by deafult should build a dynamically linked elf, that will use a shared
+library, it's possible to list the shared libraries dependencies of by a
+binary with ldd.
 
 
 [ax@c0ffee]$ ldd ex 
@@ -69,8 +71,9 @@ it's possible to list the shared libraries dependencies of by a binary with ldd.
 	/lib64/ld-linux-x86-64.so.2 (0x00007f9d32f57000)
 
 
-You should never employ ldd on an untrusted executable,	since this may result in the
-execution of arbitrary code. A safer alternative when dealing with untrusted executables is:
+You should never employ ldd on an untrusted executable,	since this may result
+in the execution of arbitrary code. A safer alternative when dealing with
+untrusted executables is:
 
 
 [ax@c0ffee]$ objdump -p ex | grep NEEDED
@@ -79,16 +82,17 @@ execution of arbitrary code. A safer alternative when dealing with untrusted exe
 
 But in this case we work on a trusted binary, right?
 
-The programs ld.so and ld-linux.so*, aka the dynamic linker/loader, find and load the
-shared objects (shared libraries) needed by a program, prepare the program to run,
-and then run it.
+The programs ld.so and ld-linux.so*, aka the dynamic linker/loader, find and
+load the shared objects (shared libraries) needed by a program, prepare the
+program to run, and then run it.
 
-The dynamic linker can be run indirectly by running some dynamically linked program
-or shared object.
+The dynamic linker can be run indirectly by running some dynamically linked
+program or shared object.
 
 LD_PRELOAD is an environment variable used by the dynamic linker,
-it can contain a list of additional, user-specified, ELF shared objects to be loaded before
-all others. The items of the list can be separated by spaces or colons.
+it can contain a list of additional, user-specified, ELF shared objects to be
+loaded before all others. The items of the list can be separated by spaces or
+colons.
 This can be used to selectively override functions in other shared objects. 
 
 This mean we may override the printf in the previous example and get the program
@@ -110,7 +114,8 @@ Compile it into a shared library with:
 #	gcc -fPIC -Wall -c -o evil_printf.o evil_printf.c		
 #	gcc -shared -o libevil_printf.so evil_printf.o
 
-When you invoke GCC, it normally does preprocessing, compilation, assembly and linking.
+When you invoke GCC, it normally does preprocessing, compilation, assembly and
+linking.
 The "overall options" allow you to stop this process at an intermediate stage.
 For example, the -c option says not to run the linker.
 Then the output consists of object files output by the assembler.
@@ -127,8 +132,8 @@ Run the example program, nothing showed up.
 This is an innocent print.. 
 
 
-Nothing strange, our evil print has not showed up. Seems that our trick doesn't work or
-something goes wrong.
+Nothing strange, our evil print has not showed up. Seems that our trick doesn't
+work or something goes wrong.
 
 Take a look at the dynamic library calls of the binary with:
 
@@ -140,12 +145,12 @@ puts("\n\nThis is an innocent print.. \n"
 
 This is an innocent print.. 
 
-)                                                                             = 32
+)                                                                           = 32
 +++ exited (status 0) +++
 
-Look, we notice the printf in our simple source was turned into a puts by GCC, this is due
-to some compiler optimizations. Note that your compiled code is not always calling the
-functions written in the source.[4]
+Look, we notice the printf in our simple source was turned into a puts by GCC,
+this is due to some compiler optimizations. Note that your compiled code is not
+always calling the functions written in the source. [4]
 Then, we have overrided the wrong function. :(
 Let's rewrite our evil_printf library, overriding the right function this time:
 
@@ -163,40 +168,45 @@ Recompile it into shared lib and rerun the example:
 Running very evil code...[ax@c0ffee]$ 
 
 Nice, it calls our library function instead of the real puts.
-In this way the puts was totally overrided and oviously it doesn't work as expected by
-the user anymore, in an evil scenario we probably want to be a little bit more stealth and
-first of all do what the user expect, then something else. ;)
+In this way the puts was totally overrided and oviously it doesn't work as
+expected by the user anymore, in an evil scenario we probably want to be a
+little bit more stealth and first of all do what the user expect, then
+something else. ;)
 This means we have to rewrite the entire printf? 
 
 No, thanks to the dynamic loading.
 
-Dynamic loading is a mechanism by which a computer program can, at run time, load a
-library (or other binary) into memory, retrieve the addresses of functions and variables
-contained in the library, execute those functions or access those variables, and unload the
-library from memory[5].
+Dynamic loading is a mechanism by which a computer program can, at run time,
+load a library (or other binary) into memory, retrieve the addresses of
+functions and variables contained in the library, execute those functions or
+access those variables, and unload the library from memory. [5]
 
 UNIX-like OSs provide dynamic loading with the C libdl.
-The four functions dlopen(), dlsym(), dlclose(), dlerror() implement the interface to the
-dynamic linking loader. 
+The four functions dlopen(), dlsym(), dlclose(), dlerror() implement the
+interface to the dynamic linking loader. 
 
-void *dlsym(void *handle, const char *symbol) is used to obtain the address of a symbol in
-a shared object or executable. We will use it to obtain the address of the real puts.
-It takes a "handle" of a dynamic loaded shared object returned by dlopen(3) along with a
-null-terminated symbol name, and returns the address where that symbol is loaded into memory. 
+void *dlsym(void *handle, const char *symbol) is used to obtain the address of
+a symbol in a shared object or executable. We will use it to obtain the address
+of the real puts.
+It takes a "handle" of a dynamic loaded shared object returned by dlopen(3)
+along with a null-terminated symbol name, and returns the address where that
+symbol is loaded into memory. 
 In this way we can call the original function when needed.
 
-This case is a bit tricky because we are in an overrided function, we want the address of
-the real puts in the libc, not our evil one. 
+This case is a bit tricky because we are in an overrided function, we want the
+address of the real puts in the libc, not our evil one. 
 
-There are two special pseudo-handles that may be specified in handle, we are interested in
-RTLD_NEXT.
+There are two special pseudo-handles that may be specified in handle, we are
+interested in RTLD_NEXT.
 
-RTLD_NEXT find the next occurrence of the desired symbol in the search order after the current object.
-This allows one to provide a wrapper around a function in  another  shared object, so that,
-for example, the definition of a function in a preloaded shared object
-(see LD_PRELOAD in ld.so(8)) can find and invoke the "real" function provided in another
-shared object (or for that matter, the "next" definition of the function in cases where there
-are multiple layers of preloading).
+RTLD_NEXT find the next occurrence of the desired symbol in the search order
+after the current object.
+This allows one to provide a wrapper around a function in  another  shared
+object, so that, for example, the definition of a function in a preloaded
+shared object (see LD_PRELOAD in ld.so(8)) can find and invoke the "real"
+function provided in another shared object (or for that matter, the "next"
+definition of the function in cases where there are multiple layers of
+preloading).
 
 We can write code like this:
 
@@ -226,11 +236,11 @@ Running very evil code...
 This is an innocent print.. 
 
 
-Probably, if our malicious code was a little more silent, a tipical user would not
-noticed it.
+Probably, if our malicious code was a little more silent, a tipical user would
+not noticed it.
 
 
-|----------------------------------- R E F E R E N C E S -----------------------------------|
+|---------------------------- R E F E R E N C E S -----------------------------|
 
 [1] man 8 ld.so 
 [2] man ldd 
@@ -241,9 +251,10 @@ noticed it.
 [7] man dlsym
 <a href="https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html#Code-Gen-Options">[8] https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html#Code-Gen-Options</a>
 
-|-------------------------------------------------------------------------------------------|
++==============================================================================+
 
-This post is just a intro and maybe could be extended, if you enjoyed it, stay tuned! ;)
+This post is just a intro and maybe could be extended, if you enjoyed it, stay
+tuned! ;)
 		</pre>
 	</div>
 </div>

@@ -9,40 +9,42 @@
    <meta name="robots" content="follow,index,all" />
    <title>cryptcoffee - GnuPG Cheatsheet</title>
    
-   <link rel="icon" type="image/png" href="imgs/favicon_64x64.png" />
-   <link href="./css/style.css" rel="stylesheet" type="text/css">
+   <link rel="icon" type="image/png" href="../imgs/favicon_64x64.png" />
+   <link href="../css/style.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
 <center>
    <div>
 	   <table style="margin-left:-103px">
-		   <tr><td><img src="imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2></td></tr>
+		   <tr><td><img src="../imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="../index.html">CRYPTCOFFEE</a></h2></td></tr>
 		   </table> 
         <p class="menu">
-        <a href="misc.html">Misc</a> -
-        <a href="research.html">Research</a> -
-        <a href="team.html">Team</a> -
-        <a href="contact.html">Contact</a>
+        <a href="../misc.html">Misc</a> -
+        <a href="../research.html">Research</a> -
+        <a href="../team.html">Team</a> -
+        <a href="../contact.html">Contact</a>
         </p>
    </div>
    
 
    
 <div>
-	<div style="width:700px; border:1px solid #7FFFD4;">
+	<div style="width:665px; border:1px solid #7FFFD4;">
 		<div style="position:relative;width: 100%;">
 			<pre>
 Last Update: June 10, 2015
 <pre style="font-size:14px;text-align:center;">-----[ GnuPG Cheatsheet ]-----</pre>
 This document is intended to be a quick note about some GnuPG commands.
-Hope this will be useful as writing it was for me. 
+I hope this will be useful as writing it was for me. 
 
-DEADBEEF is used as an example key ID, note any part of the user ID can be used as key specifier to identify a key.
+DEADBEEF is used as an example key ID, note any part of the user ID can be used
+as key specifier to identify a key.
 
 The --output option can always be omitted.
 
-Any output, keys, encrypted documents, and signatures, can be ASCII-armored by adding the --armor option.
+Any output, keys, encrypted documents, and signatures, can be ASCII-armored by 
+adding the --armor option.
 
 
 GENERATE A KEYPAIR
@@ -78,7 +80,8 @@ IMPORT A KEY
 
 VALIDATE A PUBLIC KEY
 ---------------------
-A key is validated by verifying the key's fingerprint and then signing the key, to certify that it is a valid key, and belongs to the correct user.
+A key is validated by verifying the key's fingerprint and then signing the key,
+to certify that it is a valid key, and belongs to the correct user.
 Edit the key with
 
 # gpg --edit-key DEADBEEF
@@ -87,7 +90,8 @@ then you can view the fingerprint with
 
 # fpr
 
-Now verify the fingerprint with the key owner, you must guarantee that you are communicating with the key's true owner.
+Now verify the fingerprint with the key owner, you must guarantee that you are
+communicating with the key's true owner.
 After checking the fingerprint, you may sign the key to validate it
 
 # sign
@@ -150,9 +154,6 @@ EXTRACT A SIGNED DOCUMENT
 VERIFY A SIGNED DOCUMET
 -----------------------
 # gpg --verify doc.sig
-
-
-
 		</pre>
 	</div>
 </div>

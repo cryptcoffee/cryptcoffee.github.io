@@ -7,28 +7,28 @@
    <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
    <meta name="description" content="cryptcoffee website" />
    <meta name="robots" content="follow,index,all" />
-   <title>cryptcoffee - PBKDF2</title>
+   <title>cryptcoffee - GnuPG Cheatsheet</title>
    
-   <link rel="icon" type="image/png" href="imgs/favicon_64x64.png" />
-   <link href="./css/style.css" rel="stylesheet" type="text/css">
+   <link rel="icon" type="image/png" href="../imgs/favicon_64x64.png" />
+   <link href="../css/style.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
 <center>
    <div>
 	   <table style="margin-left:-103px">
-		   <tr><td><img src="imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="index.html">CRYPTCOFFEE</a></h2></td></tr>
+		   <tr><td><img src="../imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="../index.html">CRYPTCOFFEE</a></h2></td></tr>
 		   </table> 
         <p class="menu">
-        <a href="misc.html">Misc</a> -
-        <a href="research.html">Research</a> -
-        <a href="team.html">Team</a> -
-        <a href="contact.html">Contact</a>
+        <a href="../misc.html">Misc</a> -
+        <a href="../research.html">Research</a> -
+        <a href="../team.html">Team</a> -
+        <a href="../contact.html">Contact</a>
         </p>
    </div>
    
 
-   
+ 
 <div>
 	<div style="width:665px; border:1px solid #7FFFD4;">
 		<div style="position:relative;width: 100%;">
@@ -290,7 +290,7 @@ In all the other calls the SHA1 of the previous message block is used as salt,
 and we will never have to compute more than two message blocks.
 Hence this particular most first case will not affect the global gain.
 
-<img style="border-width:0; width:100%;" src="research/imgs/pbkschemablack.png" />
+<img style="border-width:0; width:100%;" src="imgs/pbkschemablack.png" />
 
 
 
@@ -322,7 +322,7 @@ there are two SHA1 call for each HMAC, and many HMAC call as the number of the
 iteration chosen by the application.
 This means that there will be probably many SHA1 calls. :)
 
-<img style="border-width:0; width:100%;" src="research/imgs/0based.png" />
+<img style="border-width:0; width:100%;" src="imgs/0based.png" />
 
 
 
@@ -350,7 +350,7 @@ In the standard word expansion are carried out 192 XOR, knowing this
 optimization can be implemented an ad-hoc word expansion that use 162 XOR,
 saving 30.
 
-<img style="border-width:0; width:100%;" src="research/imgs/samevaluebased.png" />
+<img style="border-width:0; width:100%;" src="imgs/samevaluebased.png" />
 
 
 
@@ -377,7 +377,7 @@ values independently from the password. This means that an attacker can avoid
 to compute this word expansion in each try of its password list, reusing the
 same precomputed values.
 
-<img style="border-width:0; width:100%;" src="research/imgs/preWE.png" />
+<img style="border-width:0; width:100%;" src="imgs/preWE.png" />
 
 
 
