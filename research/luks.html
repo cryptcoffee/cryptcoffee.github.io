@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <meta http-equiv="content-language" content="en" />
+   <meta name="keywords" content="cryptcoffee, cryptography, computer security, Milano, Milan, Italy, infosec, crypto, crittografia, security, hacking, learn, computer, sicurezza" />
+   <meta name="description" content="cryptcoffee website" />
+   <meta name="robots" content="follow,index,all" />
+   <title>cryptcoffee - Dissecting LUKS</title>
+   
+   <link rel="icon" type="image/png" href="../imgs/favicon_64x64.png" />
+   <link href="../css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<center>
+   <div>
+	   <table style="margin-left:-103px">
+		   <tr><td><img src="../imgs/coffee.svg" height=113px style="margin:-3px"></td><td valign="bottom"><h2 style="margin-top:20px;"><a class="title" href="../index.html">CRYPTCOFFEE</a></h2></td></tr>
+		   </table> 
+        <p class="menu">
+        <a href="../misc.html">Misc</a> -
+        <a href="../research.html">Research</a> -
+        <a href="../team.html">Team</a> -
+        <a href="../contact.html">Contact</a>
+        </p>
+   </div>
+   
+
+ 
+<div>
+	<div style="width:665px; border:1px solid #7FFFD4;">
+		<div style="position:relative;width: 100%;">
+			<pre>
+Last Update: March 14, 2016
+<pre style="font-size:14px;text-align:center;">-----[ Dissecting LUKS ]-----</pre>
+==[ INDEX
+0x00 - Introduction
+0x01 - The LUKS format
+0x02 - Cryptsetup
+0x03 - Exploiting EXT filesystem structure
+0x04 - The impact of hash functions
+0x05 - Power management
+0x06 - PBKDF2 implementation
+0x07 - Skul
+0x08 - Conclusions
+
+
+[0x00] Introduction
+
+This post aims to clarify some concepts about the full disk encryption based on
+LUKS [1] (Linux Unified Key Setup). We will discuss some security flaws of a 
+specific implementation of LUKS, namely Cryptsetup [2].
+
+An academic paper covering this topic was presented at CANS 2015 [3], and can be
+found <a href="http://ia.cr/2016/274" target="_blank">here</a>.
+
+Cryptsetup is the most used high-level utility in hard disk encryption on 
+GNU/Linux, it's based on dm-crypt [4] kernel module and relays on libgcrypt as
+the default crypto-backend library. Note that Cryptsetup can be configured with
+a number of other libraries, and libgcrypt is only the default one.
+
+
+
+[0x01] The LUKS format
+
+The LUKS format is a disk-encryption specification designed by Clemens 
+Fruhwirth in 2005. The specification employs a TKS2 [5] schema with a two level
+key hierarchy, so the encrypted master key is stored on the disk, and recovered
+when the partition is unlocked. 
+
+The master key, generated at installation time, is encrypted with a symmetric 
+block cipher (XTS-AES-128 by default), using a key deriverd from a user provided
+password by PBKDF2, that provides some resistance against brute-force attacks 
+[6].
+
+The LUKS format provides up to 8 key matherial sections (KM), each one can
+contain a copy of the same master key, encrypted with a different password;
+this allow different users to use different passwords to decrypt the same disk.
+
+The LUKS header looks like:
+
+    +---------+-----+-----+-----+-----+---------------------------------+
+    | pheader | KM1 | KM2 | ... | KM8 |    User    encrypted    data    |
+    +---------+-----+-----+-----+-----+---------------------------------+
+
+The partition header (pheader) contains information about salts, iteration 
+counts for PBKDF2, key slots, used cipher, cipher mode, key length, hash 
+function, etc. These informations don't need to be kept private, so they're not
+encrypted.
+
+
+
+[0x02] Cryptsetup
+
+The most famous implementation of LUKS is the Linux Cryptsetup utility, which
+makes use of the Dm-crypt kernel module for real-time encryption and decrytpion.
+
+LUKS employs PBKDF2 against user passwords, the usual burning aspect demanded to
+applications is the PBKDF2's iteration counts: too much iterations mean an
+unusable system while too few of them will deliver an insufficient level of
+security.
+
+Cryptsetup establishes this parameter by performing some tests on the machine at
+installation time, but we found that many unexpected factors can affect 
+negatively these tests; allowing an attacker to recover the master key faster 
+than expected. The tests are done using the Libgcrypt's PBKDF2 function 
+implementation since libgcrypt is the default library.
+
+As shown in the "master key recovery process schema", the user-provided
+passphrase, the salt and the iteration count are provided to PBKDF2 to get a
+key for the decryption of the master key, which has been stored and split-up on
+disk as anti-forenic technique. At this point the master key's chunks are merged 
+and become a candidate master key, ready to be checked.
+
+In the TKS2 schema the check is done by applying once again PBKDF2 on the candidate
+key and comparing the result to a previously computed fingerprint, which is also
+stored on disk, in its partition header.
+
+
+
+[0x03] Exploiting EXT filesystem structure
+
+             =======================================================          
+             E   X   T         F   I   L   E   S   Y   S   T   E   M          
+   +---------=======================================================---------+
+   | GROUP | SUPER | GROUP | GDT | DATA  BLOCK | INOD   | INOD  |    DATA    |
+   |   0   | BLOCK | DESC. |     |    BITMAP   | BITMAP | TABLE |   BLOCKS   |
+   |-------+-------+-------+-----+-------------+--------+-------+------------|
+   | 1024  |  ...  |  ...  | ... |     ....    |  ....  |  ...  |    ....    |
+   | BYTES |       |       |     |             |        |       |            |
+   +-------+-------+-------+-----+-------------+--------+-------+------------+
+
+In our analysis we found that the previously described key checking process
+is neither the only method to check a candidate master key, and unfortunatelly
+nor the faster.
+
+It's possible to check the EXT's "GROUP 0", that in the case of an encrypted 
+LUKS partition is not used to boot-up the system, but filled with zeros instead.
+Looking at the master key recovery schema, we noticed that the 
+encrypted-partition's "GROUP 0" content can be exploited so that during the 
+key checksum process we skip the standard candidate key check method (2nd PBKDF2
+call) by decrypting 16 (one AES block) out of the 1024 bytes of "GROUP 0" 
+instead.
+The candidate key is the correct one if the result of the decryption matches the 
+zeros previously witten in "GROUP 0". This saves about 20% of the time used by
+the whole derivation process.
+
+                     ====================================                       
+                     H   A   R   D          D   I   S   K                       
++--------------------====================================----------------------+
+| +------------------+  +----------------------------------------------------+ |
+| |                  |  |                                                    | |
+| |  BOOT PARTITION  |  |           L U K S      P A R T I T I O N           | |
+| | *                |  |                                                  * | |
+| +-|----------------+  +--------------------------------------------------|-+ |
++---|----------------------------------------------------------------------|---+
+    +---+                                                              +---+    
+        |                                                              |        
+        V                                                              V        
+  +------------------+     +--------+------+------+------+=====================+
+  |    UNENCRYPTED   |     |  LUKS  |      |      |      | USER ENCRYPTED DATA |
+  |  BOOT PARTITION  |     | HEADER | KM 1 | .... | KM 8 |  ( EXT FILESYSTEM ) |
+  | (EXT FILESYSTEM) |     +--------+------+------+------+====================*+
+  +----------*-------+                                                        | 
+             |                                                                | 
+             V                                                                | 
+ E   X   T          F   I   L   E   S   Y   S   T   E   M                     | 
++-------+-------+-------+-----+-------------+--------+-------+------------+   | 
+| GROUP | SUPER | GROUP | GDT | DATA  BLOCK | INOD   | INOD  |    DATA    |   | 
+|   0   | BLOCK | DESC. |     |    BITMAP   | BITMAP | TABLE |   BLOCKS   |   | 
+|-------+-------+-------+-----+-------------+--------+-------+------------|   | 
+| 1024  |  ...  |  ...  | ... |     ....    |  ....  |  ...  |    ....    |   | 
+| BYTES |       |       |     |             |        |       |            |   | 
++-----*-+-------+-------+-----+-------------+--------+-------+------------+   | 
+      |                                                                       | 
+      V                                                               +-------+ 
++-------------+                                                       |         
+| BOOT SECTOR |                                                       V         
++-------------+      E   X   T          F   I   L   E   S   Y   S   T   E   M   
+    +=======+=================================================================+ 
+    | GROUP | SUPER | GROUP | GDT | DATA  BLOCK | INOD   | INOD  |    DATA    | 
+    |   0   | BLOCK | DESC. |     |    BITMAP   | BITMAP | TABLE |   BLOCKS   | 
+    |=======+=======+=======+=====+=============+========+=======+============| 
+    | 1024  |  ...  |  ...  | ... |     ....    |  ....  |  ...  |    ....    | 
+    | BYTES |       |       |     |             |        |       |            | 
+    +=====*=+=======+=======+=====+=============+========+=======+============+ 
+          |                                                                     
+          V                                                                     
+    +==============+                                                            
+    | ZERO PADDING |                                                            
+    +==============+                                                            
+                                                     == S   C   H   E   M   A ==
+                                                          FIRST  1024  BYTES    
+                                                        EXT-FAMILY FILE SYSTEMS 
+                                                     ===========================
+
+As you can see in scheme of the master key recovery process there are two
+iteration counts involved in the key management. The first one is used in the 
+first key-derivation process, while the second one is involved in the master key
+check process (the second key-derivation).
+The first derivation covers about the 75% of the computational effort
+required by the whole process, the second the remaining 25%. 
+
+TABLE 1: Average iteration counts involved in the KEY DERIVATION process.
+ ==============================================================================
+ CPU              | OS                | sha1    | sha512  | sha256  | ripemd160
+ =================+===================+=========+=========+=========+==========
+ Atom z520        | Debian 7.7 x86    | 31,035  | 7,019   | 18,567  | 29,491
+ Core 2 Duo T6670 | Kali 1.0 x86      | 151,772 | 22,821  | 67,634  | 111,791
+ Pentium 3556U    | Xubuntu 14.04 x64 | 126,617 | 50,082  | 77,379  | 103,287
+ Core i3 2310M    | Fedora 20 x64     | 136,375 | 50,107  | 77,682  | 111,536
+ Pentium T4500    | Ubuntu 12.04 x64  | 147,904 | 56,380  | 85,167  | 119,366
+ Core i5 3320M    | Debian 7.7 x64    | 232,203 | 88,843  | 139,985 | 196,209
+ Core i7 2860QM   | Kubuntu 14.04 x64 | 248,671 | 90,225  | 123,904 | 179,947
+ Core i7 4710MQ   | ArchLinux x64     | 588,761 | 302,148 | 392,916 | 350,378
+ ==============================================================================
+
+TABLE 2: Average iteration counts involved in the master KEY CHECKSUM process.
+  ============================================================================
+  CPU              | OS                | sha1    | sha512 | sha256 | ripemd160
+  =================+===================+=========+========+========+==========
+  Atom z520        | Debian 7.7 x86    | 7,826   | 1,702  | 4,668  | 7,327
+  Core 2 Duo T6670 | Kali 1.0 x86      | 37,761  | 5,752  | 27,498 | 16,764 
+  Pentium 3556U    | Xubuntu 14.04 x64 | 31,419  | 12,406 | 19,318 | 25,659 
+  Core i3 2310M    | Fedora 20 x64     | 33,903  | 12,657 | 19,307 | 27,718
+  Pentium T4500    | Ubuntu 12.04 x64  | 36,913  | 14,009 | 21,495 | 29,951
+  Core i5 3320M    | Debian 7.7 x64    | 58,218  | 22,026 | 34,802 | 49,138
+  Core i7 2860QM   | Ubuntu 14.04 x64  | 54,371  | 19,353 | 30,926 | 44,927
+  Core i7 4710MQ   | ArchLinux x64     | 147,727 | 75,570 | 98,929 | 87,572
+  ============================================================================
+
+Table 1 and 2 dipicts this behavour. We report the data collected encrypting a
+disk using different CPUs, repeating each test 10-times to ensure the test is
+not influenced by external factors.
+
+In particular, Table 1 reports the iteration count for PBKDF2 established by 
+Cryptsetup for the key-derivation when different hash functions are employed, 
+while Table 2 reports the related iteration count for the master key check.
+
+=== CANDIDATE KEY GENERATION PROCESS ===========================================
+                                   +---------------+                            
+             USER PASSPHRASE ----->|               |                            
+                        SALT ----->|  P B K D F 2  |-------+                    
+             ITERATION COUNT ----->|               |       |                    
+                                   +---------------+       |                    
+                                                           |                    
+                           +----------DERIVED-KEY----------+                    
+                           |                                                    
+                           V                                                    
+                  +-----------------+              +-------------------+        
+  ENCRYPTED       |                 |  SPLITTED    |                   |        
+  SPLITTED   ---->|  D E C R Y P T  |------------->|  A F - M E R G E  |-----+  
+  MASTER KEY      |                 |  MASTER KEY  |                   |     |  
+                  +-----------------+              +-------------------+     |  
+                                                                             |  
+                                           +----------CANDIDATE-KEY----------+  
+=== KEY CHECKSUM PROCESS ================= | ===================================
+                                           V                                    
+                                   +---------------+                            
+                        SALT ----->|               |                            
+                                   |  P B K D F 2  |                            
+             ITERATION COUNT ----->|               |                            
+                                   +---------------+                            
+                                           |                                    
+                                       CANDIDATE                                
+                                         DIGEST                                 
+                                           |                                    
+                                           V                                    
+                                    +-------------+                             
+                                    |             |                             
+            MASTER KEY DIGEST ----->|  C H E C K  |                             
+                                    |             |                             
+                                    +-------------+                             
+                                                     == S   C   H   E   M   A ==
+                                                             MASTER  KEY        
+                                                          RECOVERY  PROCESS     
+                                                     ===========================
+
+
+
+[0x04] The impact of hash functions
+
+Another inconsistance revealed by our analysis is the variation in the iteration
+counts observed by varying the hash function used in PBKDF2. 
+
+It sounds quite strange that the iteration count resolved by Cryptsetup is
+higher using SHA1 then using more secure hash functions such as SHA256 or
+SHA512. We experimentally collected a number of partition headers using
+different hash functions, and as you can see in Tables 1 and 2, more secure hash
+functions always come with a smaller iteration count.
+We wanted to know more, hence we tryied to compute a set of 250.000 master
+key candidates using different hash functions with the same number of iterations
+(500.000):
+
+                  MINs                                                          
+                   ^                                                            
+              1000 |                                                            
+                  -|                                                            
+               800 |                             []                             
+                  -|  []                         []                             
+               600 |  []               []        []                             
+                  -|  []      []       []        []                             
+               400 |  []      []       []        []                             
+                  -|  []      []       []        []                             
+               200 |  []      []       []        []                             
+                  -|  []      []       []        []        HASH                 
+                 0 +------+--------+--------+----------> FUNCTIONS              
+                     SHA1 | SHA256 | SHA512 | RIPEMD160                         
+
+FIGURE 1: Time spent to computing a set of 250,000 master key candidates.
+
+Analyzing the test results we can deduce that computing a set of candidate keys 
+based on SHA-2 costs less than the same set based on SHA-1, so on equal 
+iterations it's easier to attack a FDE solution which make use of a safer hash
+function!
+
+Digging a bit deeper in PBKDF2 clarifies this issue. 
+
+Let's assume we're generating a key for AES-256 which is the default choice for 
+Cryptsetup, so we will ask PBKDF2 for a 32-bytes key.
+In order to compute such a key with SHA-1, PBKDF2 is required to compute 2 
+fingerprints, as the SHA-1 output is only 20 bytes in length.
+Hash functions in the SHA-2 family generates enough bytes with
+just one shot (1 digest) instead, so we are required to compute less hashes. 
+This means, that on equal iterations values, it is easier to attack PBKDF2 based
+on SHA-2 family than PBKDF2 based on SHA-1 !!
+
+Wait a sec!, didn't we say earlier that hash functions are computed by runtime
+benchmarking the system?
+Shouldn't this mechanism avoid running into these problems...?
+So, we reviewed the code of Cryptsetup v1.6.8 and we found that the
+benchmark wasn't properly made, allowing this anomalous behaviour.
+
+In particular, the installation-time benchmark was made asking PBKDF2 for a 
+1-byte output key.
+This way, indepentently from the underlying hash function, PBKDF2 is forced to
+compute only one fingerprint!! But when Cryptsetup is asked to derive the 
+encryption key from the user passphrase, PBKDF2 is asked for providing a 
+32-byte key.
+This means that in the case of SHA1 it's necessary to compute two hashes,
+while for SHA512 it's necessary only one.
+That said PBKDF2 will compute double the hashes when SHA1 is used,
+so an attacker will also need double the effort to brute-force the corrispondent
+key, then SHA1 better protects the user passphrase compared to SHA512.
+
+So it seems that Cryptsetup just imposes a double iteration count when using 
+SHA1, and the correct one when using hashes from the SHA2 family. 
+This is not a problem in the case of SHA1 we will have double the security.
+But.. .analysing deeper the LUKS_set_key function we discovered that the 
+iteration count obtained by the benchmark was decreased by a factor 2, in 
+particular:
+
+==================================[keymanage.c]=================================
+PBKDF2_temp = (*PBKDF2_per_sec / 2) * (uint64_t)iteration_time_ms;
+BKDF2_temp /= 1024;
+if (PBKDF2_temp > UINT32_MAX)
+   PBKDF2_temp = UINT32_MAX;
+   hdr->keyblock[keyIndex].passwordIterations = at_least((uint32_t)PBKDF2_temp,
+                                                     LUKS_SLOT_ITERATIONS_MIN);
+================================================================================
+
+So it is not true that the iteration count is doubled for SHA1. Instead, due to
+that division, the iteration count will be correct when SHA1 is used, and halved
+when using hash functions that provides enough bytes in one fingerprint!
+
+
+
+[0x05] Power management
+
+From the collected encrypted partitions we also noticed that an important
+role is played by the power management employed. Infact often with the intent
+of saving battery, users enables aggressive power saving policies, which
+impact performance by lowering CPU clock frequence.
+
+Guess what?!
+Encrypting a disk in a similar condition means reducing even more the iteration
+count established by crytpsetup's benchmark test!!!
+
+TABLE 3: Power saving policies and their impact on the iteration count values.
+        ================================================================        
+                             |        SHA1         |      SHA512                
+        =====================+=========+===========+=========+==========        
+        CPU                  | Plugged | Unplugged | Plugged | Unplugged        
+        =====================+=========+===========+=========+==========        
+        Intel Atom z520      | 31,035  | 18,693    | 7,019   | 4,288            
+        Intel Pentium 3556U  | 126,617 | 62,969    | 50,082  | 25,161           
+        Intel Core i7 4710MQ | 588,761 | 202,143   | 302,148 | 104,216          
+        =====================+=========+===========+=========+==========        
+                             |       SHA256        |       RIPEMD               
+        =====================+=========+===========+=========+==========        
+        CPU                  | Plugged | Unplugged | Plugged | Unplugged        
+        =====================+=========+===========+=========+==========        
+        Intel Atom z520      | 18,567  | 11,094    | 29,491  | 17,813           
+        Intel Pentium 3556U  | 77,379  | 38,714    | 103,287 | 51,603           
+        Intel Core i7 4710MQ | 392,916 | 135,207   | 350,378 | 121,483          
+        ================================================================        
+
+In Table 3 we report a comparison between the iterations counts when using power
+saving policies against full CPU power. These tests are made by installing
+Laptop Mode Tools version 1.66.
+
+
+
+[0x06] PBKDF2 implementation
+
+The last weakness we found in our analysis is related to the PBKDF2 
+implementation adopted in Cryptsetup. 
+As explained in our previous post [6], it's possible to compute PBKDF2 in half
+the time implementing the HMAC optimization described in both FIPS 198-1 [7] and
+RFC 2104 [8], but a lot of libraries still don't implement it.
+(see also Joe Birr-Pixton awesome talk at Passwords15 [9]).
+
+We recall that the default configuration of Cryptsetup relies on libgcrypt,
+which didn't implement the improvement till our discussion [10] although
+this PBKDF2 vulnerability seems overaged to someone.
+
+PBKDF2 performances are important in a context like this, since the iteration 
+count used to protect the user password from bruteforce attacks is determined by
+cryptsetup, benchmarking the system. The default is as many rounds as needed for
+1 second of PBKDF2 computation. A slow implementation of PBKDF2 means a lower 
+security level, that is less rounds in one second.
+
+
+
+[0x07] Skul
+
+Skul is a PoC we coded to bruteforce the Cryptsetup implementation of LUKS.
+It has been used for all the tests reported here using OpenSSL implementation of 
+PBKDF2.
+
+On August 2015 a highly optimized version of PBKDF2 was presented at Password15 
+[9], we merged this implementation in our PoC, that can be found <a href="https://github.com/cryptcoffee/skul" target="_blank">here</a>.
+
+
+
+[0x08] Conclusions
+
+We cooperated with the mantainers of both Cryptsetup and Ligbcrypt to fix the 
+presented weaknesses [11, 10].
+
+When it comes to the power management, it's not strictly Cryptsetup's concern.
+We suggest to disable Laptop mode and any other power saving policy while 
+encrypting your disk, since these may interfere with the CPU frequency 
+management.
+
+
+
+[0x09] References 
+
+<a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/LUKS-standard/on-disk-format.pdf" target="_blank">[1]  Clemens Fruhwirth. LUKS On-Disk Format Specification Version 1.2.1. (2011)</a> 
+<a href="https://gitlab.com/cryptsetup/cryptsetup" target="_blank">[2]  Cryptsetup</a> 
+<a href="http://eprint.iacr.org/2016/274" target="_blank">[3]  Simone Bossi, Andrea Visconti. What Users Should Know About Full Disk 
+     Encryption Based on LUKS. (2015)</a> 
+<a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt" target="_blank">[4]  DMCrypt</a> 
+<a href="http://clemens.endorphin.org/nmihde/nmihde-A4-ds.pdf" target="_blank">[5]  Clemens Fruhwirth. New methods in hard disk encryption. (2005)</a> 
+<a href="http://crypt.coffee/research/pbkdf2.html" target="_blank">[6]  Exploiting some weaknesses of PBKDF2</a> 
+<a href="http://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf" target="_blank">[7]  FIPS PUB 198-1, The Keyed-Hash Message Authentication Code (HMAC) </a> 
+<a href="https://www.ietf.org/rfc/rfc2104.txt" target="_blank">[8]  RFC 2104: HMAC: Keyed-hashing for message authentication</a> 
+<a href="https://jbp.io/2015/08/11/pbkdf2-performance-matters/" target="_blank">[9]  Joe Birr-Pixton, PBKDF2: performance matters </a> 
+<a href="http://git.gnupg.org/cgi-bin/gitweb.cgi?p=libgcrypt.git;a=commit;h=f7505b550dd591e33d3a3fab9277c43c460f1bad" target="_blank">[10] md: keep contexts for HMAC in GcryDigestEntry.</a> 
+<a href="https://www.kernel.org/pub/linux/utils/cryptsetup/v1.7/v1.7.0-ReleaseNotes" target="_blank">[11] Cryptsetup 1.7.0 Release Notes.</a> 
+</pre>
+	</div>
+</div>
+
+</center>
+
+ <div align="center" class="footer">
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+                </a><br /><br />
+                <span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">crypt.coffee website</span> by 
+                <a xmlns:cc="http://creativecommons.org/ns#" href="http://crypt.coffee" property="cc:attributionName" rel="cc:attributionURL">cryptcoffee</a> is licensed under a <br />
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>. 
+           </div>
+</body>
+</html>
