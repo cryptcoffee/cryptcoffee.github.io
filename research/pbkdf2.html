@@ -29,12 +29,11 @@
    
 
  
-<div>
-	<div style="width:665px; border:1px solid #7FFFD4;">
-		<div style="position:relative;width: 100%;">
+	<div class="lineContainer">
+		<div class="innerContainer">
 			<pre>
-Last Update: December 16, 2015
-<pre style="font-size:14px;text-align:center;">-----[ Exploiting some weaknesses of PBKDF2 ]-----</pre>
+Last Update: Dec 16, 2015
+<h3>          -----[ Exploiting some weaknesses of PBKDF2 ]-----</h3>
 ----[ 0x00 ] Intro
 ----[ 0x01 ] PBKDF
 ----[ 0x02 ] SHA1
@@ -292,7 +291,7 @@ In all the other calls the SHA1 of the previous message block is used as salt,
 and we will never have to compute more than two message blocks.
 Hence this particular most first case will not affect the global gain.
 
-<img style="border-width:0; width:100%;" src="imgs/pbkschemablack.png" />
+<img style="border-width:0; width:80ch;" src="imgs/pbkschemablack.png" />
 
 
 
@@ -324,7 +323,7 @@ there are two SHA1 call for each HMAC, and many HMAC call as the number of the
 iteration chosen by the application.
 This means that there will be probably many SHA1 calls. :)
 
-<img style="border-width:0; width:100%;" src="imgs/0based.png" />
+<img style="border-width:0; width:80ch;" src="imgs/0based.png" />
 
 
 
@@ -352,7 +351,7 @@ In the standard word expansion are carried out 192 XOR, knowing this
 optimization can be implemented an ad-hoc word expansion that use 162 XOR,
 saving 30.
 
-<img style="border-width:0; width:100%;" src="imgs/samevaluebased.png" />
+<img style="border-width:0; width:80ch;" src="imgs/samevaluebased.png" />
 
 
 
@@ -379,7 +378,7 @@ values independently from the password. This means that an attacker can avoid
 to compute this word expansion in each try of its password list, reusing the
 same precomputed values.
 
-<img style="border-width:0; width:100%;" src="imgs/preWE.png" />
+<img style="border-width:0; width:80ch;" src="imgs/preWE.png" />
 
 
 

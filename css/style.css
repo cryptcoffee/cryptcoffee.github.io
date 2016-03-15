@@ -90,4 +90,15 @@ pre{
     white-space:pre-wrap;
 }
 
+.lineContainer{
+	border:1px solid #7fffd4;
+	position:relative;
+	/*left:90px;*/
+	width:90ch;
+}
 
+.innerContainer{
+	position:relative;
+	width:100%;
+	background-color:transparent;
+}
