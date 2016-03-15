@@ -17,6 +17,8 @@ body {
     background-color:black;
 }
 
+/*======= HEADER =======*/
+
 h1 {
     color: #7FFFD4;
     font-size-adjust:0.5;
@@ -31,6 +33,7 @@ h2 {
     margin:0px 0px;
     text-align:center;
 }
+
 
 .title{
     font-family: cryptcoffeefont;
@@ -90,6 +93,8 @@ pre{
     white-space:pre-wrap;
 }
 
+/*======= POSTS =======*/
+
 .lineContainer{
 	border:1px solid #7fffd4;
 	position:relative;
@@ -102,3 +107,15 @@ pre{
 	width:100%;
 	background-color:transparent;
 }
+
+/*======= MENUS =======*/
+.menuLineContainer{
+	border:1px solid #7fffd4;
+	width:665px;
+}
+
+.menuInnerContainer{
+	position:relative;
+	width:100%;
+}
+
