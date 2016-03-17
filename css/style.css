@@ -1,6 +1,7 @@
 @font-face {
     font-family: cryptcoffeefont; /* SOURCE: http://www.04.jp.org */
-    src: url("../font/04b19/Font04B19.ttf") format('truetype');
+    src: url("../font/04b19/Font04B19.ttf") format('truetype'),
+         url('../font/04b19/Font04B19.eot');
 }
 
 @font-face {
@@ -83,6 +84,7 @@ a:hover {
 
 pre{
     font-family: monospace;
+    font-size:14px;
     background-color:black;
     color:#7FFFD4;
     text-align: left;
@@ -99,7 +101,7 @@ pre{
 	border:1px solid #7fffd4;
 	position:relative;
 	/*left:90px;*/
-	width:90ch;
+	width:105ch;
 }
 
 .innerContainer{
